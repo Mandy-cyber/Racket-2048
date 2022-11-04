@@ -142,32 +142,46 @@
             EMPTY-GRID)
            14))
 
+;;; TEMPLATE
+;;;-------------
+#;(define (gs-temp gs)
+    ...(gs-blocks gs)...(gs-grid gs)...(gs-spacesleft gs))
 
 ;-----------------------------------------------------------------------------
 ; KEY HANDLERS
 ;-----------------------------------------------------------------------------
 
-;;; move-left : Block -> Block
-;;; Moves a block to the left
-#;(define (move-left b)
-  (make-block (block-box b)
-    (make-gridpos (make-posn
-                   (- 120 (posn-x (gridpos-posn (block-gridpos b))))
-                  (posn-y (gridpos-posn (block-gridpos b)))))
-    (block-numval b)))
+;;; pos-in-blocks? : Posn [ListOf Block] -> Boolean
+;;; Checks if there is a block in a given position
+(define (pos-in-blocks? p lob)
+  (member? p (map block-gridpos lob)))
+
+(check-expect (pos-in-blocks? (make-posn 190 70) (list)) #f)
+(check-expect (pos-in-blocks? (make-posn 70 70) (list B1 B2)) #t)
+(check-expect (pos-in-blocks? (make-posn 430 310) (list B1)) #f)
 
 
 ;;; change-gp-left : GridPos -> GridPos
 ;;; Shift the gridpos to the left
+(define (change-gp-left gp)
+  (local [(define x (posn-x gp))]
+    (cond
+      [(= x 70) gp]
+      [else (make-posn (- x 120) (posn-y gp))])))
 
-#|
-(define GP1 (make-gridpos (make-posn 70 70)))
-(define GP2 (make-gridpos (make-posn 190 310)))
-(define GP3 (make-gridpos (make-posn 430 430)))
+;(is position in list of positions of blocks)
+
+(check-expect (change-gp-left GP1) (make-posn 70 70))
+(check-expect (change-gp-left GP2) (make-posn 70 310))
+(check-expect (change-gp-left GP3) (make-posn 310 430))
 
 
-(check-expect (change-gp-left GP1) (make-gridpos (make-posn )))
-|#
+
+;;; move-left : GameState -> GameState
+;;; Moves the blocks in the grid left
+(define (move-left gs))
+
+
 
 
 ;-----------------------------------------------------------------------------
