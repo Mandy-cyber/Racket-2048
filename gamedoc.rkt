@@ -104,7 +104,7 @@
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
 (define-struct gs [blocks grid spacesleft])
-; A GameState is a (make-gs [ListOf Block] [Image Image -> Image] Number[0,14])
+; A GameState is a (make-gs [ListOf Block] Image Number[0,14])
 ; - blocks is a list of all blocks in the grid
 ; - grid is the image of the blocks in their different positions
 ; - spacesleft is the number of spaces left in the grid
@@ -169,17 +169,44 @@
       [(= x 70) gp]
       [else (make-posn (- x 120) (posn-y gp))])))
 
-;(is position in list of positions of blocks)
-
 (check-expect (change-gp-left GP1) (make-posn 70 70))
 (check-expect (change-gp-left GP2) (make-posn 70 310))
 (check-expect (change-gp-left GP3) (make-posn 310 430))
 
 
+;;; change-block-left : Block -> Block
+;;; Shifts a block to the left
+(define (change-block-left b)
+  (make-block (block-box b)
+              (change-gp-left (block-gridpos b))
+              (block-numval b)))
 
-;;; move-left : GameState -> GameState
+(check-expect (change-block-left B1)
+              (make-block box2 (make-posn 70 70) 2))
+(check-expect (change-block-left B2)
+              (make-block box64 (make-posn 70 310) 64))
+(check-expect (change-block-left B3)
+              (make-block box128 (make-posn 310 430) 128))
+
+
+
+;;; move-left : [ListOf Block] -> [ListOf Block]
 ;;; Moves the blocks in the grid left
-(define (move-left gs))
+(define (move-left lob)
+  (if (pos-in-blocks? (change-gp-left (block-gridpos (first lob)))
+                      (map change-block-left (rest lob)))
+    
+      (cons (first lob) (move-left (rest lob)))
+    
+      (cons
+       (make-block (block-box (first lob))
+                   (change-gp-left (block-gridpos (first lob)))
+                   (block-numval (first lob)))
+       (move-left (rest lob)))))
+
+
+
+
 
 
 
