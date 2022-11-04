@@ -107,7 +107,7 @@
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
 (define-struct gs [blocks grid spacesleft])
-; A GameState is a (make-gs [ListOf Block] Image Number[0,14])
+; A GameState is a (make-gs [ListOf Block] [16 Images -> Image] Number[0,14])
 ; - blocks is a list of all blocks in the grid
 ; - grid is the image of the blocks in their different positions
 ; - spacesleft is the number of spaces left in the grid
@@ -118,19 +118,26 @@
 ;;;---------------
 (define GAP (rectangle 20 100 "solid" "darkblue"))
 (define HGAP (rectangle 500 20 "solid" "darkblue"))
-(define BLANK-SQUARE (square 100 "solid" "lightblue"))
-(define ROW
-  (beside GAP BLANK-SQUARE GAP BLANK-SQUARE
-          GAP BLANK-SQUARE GAP BLANK-SQUARE GAP))
+(define BS (square 100 "solid" "lightblue"))
+
+; will make more efficient later
+(define (grid a b c d e f g h i j k l m n o p)
+  (above HGAP (beside GAP a GAP b GAP c GAP d GAP)
+   HGAP (beside GAP e GAP f GAP g GAP h GAP)
+   HGAP (beside GAP i GAP j GAP k GAP l GAP)
+   HGAP (beside GAP m GAP n GAP o GAP p GAP)
+   HGAP))
 
 (define EMPTY-GRID
-  (above HGAP ROW HGAP ROW HGAP ROW HGAP ROW HGAP))
+  (grid BS BS BS BS BS BS BS BS BS BS BS BS BS BS BS BS))
 
 
 ;;; EXAMPLES
 ;;;-------------
-;(define GS0 (make-gs (list B2 B2) <grid-goes-here> 14))
-;(define GS1 (make-gs (list B2 B4 B8) <grid-goes-here> 11))
+#|(define GS0
+  (make-gs (list B2 B2) () 14))
+
+(define GS1 (make-gs (list B2 B4 B8) <grid-goes-here> 11))|#
 
 
 
