@@ -88,6 +88,7 @@
 (define B1 (make-block box2 GP1 2))
 (define B2 (make-block box64 GP2 64))
 (define B3 (make-block box128 GP3 128))
+(define B4 (make-block box1024 (make-posn 70 310) 1024))
 
 
 ;;; TEMPLATE
@@ -189,22 +190,34 @@
               (make-block box128 (make-posn 310 430) 128))
 
 
-
 ;;; move-left : [ListOf Block] -> [ListOf Block]
 ;;; Moves the blocks in the grid left
 (define (move-left lob)
-  (if (pos-in-blocks? (change-gp-left (block-gridpos (first lob)))
-                      (map change-block-left (rest lob)))
+  (cond
+    [(empty? lob) lob]
+    [(cons? lob)
+     (if (pos-in-blocks? (change-gp-left (block-gridpos (first lob)))
+                         (map change-block-left (rest lob)))
     
-      (cons (first lob) (move-left (rest lob)))
+         (cons (first lob) (move-left (rest lob)))
     
-      (cons
-       (make-block (block-box (first lob))
-                   (change-gp-left (block-gridpos (first lob)))
-                   (block-numval (first lob)))
-       (move-left (rest lob)))))
+         (cons
+          (make-block (block-box (first lob))
+                      (change-gp-left (block-gridpos (first lob)))
+                      (block-numval (first lob)))
+          (move-left (rest lob))))]))
 
 
+(check-expect (move-left '()) '())
+
+(check-expect (move-left (list B1 B2))
+              (list (make-block box2 (make-posn 70 70) 2)
+                    (make-block box64 (make-posn 70 310) 64)))
+
+(check-expect (move-left (list B1 B2 B4))
+              (list (make-block box2 (make-posn 70 70) 2)
+                    (make-block box64 (make-posn 190 310) 64)
+                    (make-block box1024 (make-posn 70 310) 1024)))
 
 
 
