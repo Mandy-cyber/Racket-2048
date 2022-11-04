@@ -162,59 +162,91 @@
 (check-expect (pos-in-blocks? (make-posn 430 310) (list B1)) #f)
 
 
-;;; change-gp-left : GridPos -> GridPos
-;;; Shift the gridpos to the left
-(define (change-gp-left gp)
-  (local [(define x (posn-x gp))]
+;;; change-gp-h : GridPos String -> GridPos
+;;; Shift the gridpos in a given horizontal direction
+(define (change-gp-h gp dir)
+  (local [(define x (posn-x gp))
+          (define border-case (if (string=? dir "left") 70 430))
+          (define op (if (string=? dir "left") - +))]
     (cond
-      [(= x 70) gp]
-      [else (make-posn (- x 120) (posn-y gp))])))
+      [(= x border-case) gp]
+      [else (make-posn (op x 120) (posn-y gp))])))
 
-(check-expect (change-gp-left GP1) (make-posn 70 70))
-(check-expect (change-gp-left GP2) (make-posn 70 310))
-(check-expect (change-gp-left GP3) (make-posn 310 430))
+(check-expect (change-gp-h GP1 "left") (make-posn 70 70))
+(check-expect (change-gp-h GP2 "left") (make-posn 70 310))
+(check-expect (change-gp-h GP2 "right") (make-posn 310 310))
+(check-expect (change-gp-h GP3 "right") (make-posn 430 430))
 
-
-;;; change-block-left : Block -> Block
-;;; Shifts a block to the left
-(define (change-block-left b)
-  (make-block (block-box b)
-              (change-gp-left (block-gridpos b))
-              (block-numval b)))
-
-(check-expect (change-block-left B1)
-              (make-block box2 (make-posn 70 70) 2))
-(check-expect (change-block-left B2)
-              (make-block box64 (make-posn 70 310) 64))
-(check-expect (change-block-left B3)
-              (make-block box128 (make-posn 310 430) 128))
+(define (change-gp-left gp) (change-gp-h gp "left"))
+(define (change-gp-right gp) (change-gp-h gp "right"))
 
 
-;;; move-left : [ListOf Block] -> [ListOf Block]
-;;; Moves the blocks in the grid left
-(define (move-left lob)
+;;; change-gp-v : GridPos String -> GridPos
+;;; Shift the gridpos in a given vertical direction
+(define (change-gp-v gp dir)
+  (local [(define y (posn-y gp))
+          (define border-case (if (string=? dir "up") 70 430))
+          (define op (if (string=? dir "up") - +))]
+    (cond
+      [(= y border-case) gp]
+      [else (make-posn (posn-x gp) (op y 120))])))
+
+(check-expect (change-gp-v GP2 "up") (make-posn 190 190))
+(check-expect (change-gp-v GP3 "up") (make-posn 430 310))
+(check-expect (change-gp-v GP1 "down") (make-posn 70 190))
+(check-expect (change-gp-v GP2 "down") (make-posn 190 430))
+
+(define (change-gp-up gp) (change-gp-v gp "up"))
+(define (change-gp-down gp) (change-gp-v gp "down"))
+
+
+;;; change-block-h : Block String -> Block
+;;; Shifts a block in a given vertical direction
+(define (change-block-h b dir)
+  (make-block (block-box b) (change-gp-h (block-gridpos b) dir) (block-numval b)))
+
+(check-expect (change-block-h B1 "left") (make-block box2 (make-posn 70 70) 2))
+(check-expect (change-block-h B3 "right") (make-block box128 (make-posn 430 430) 128))
+
+(define (change-block-left b) (change-block-h b "left"))
+(define (change-block-right b) (change-block-h b "right"))
+
+
+;;; change-block-v : Block String -> Block
+;;; Shifts a block in a given vertical  direction
+(define (change-block-v b dir)
+  (make-block (block-box b) (change-gp-v (block-gridpos b) dir) (block-numval b)))
+
+(check-expect (change-block-v B1 "down") (make-block box2 (make-posn 70 190) 2))
+(check-expect (change-block-v B3 "up") (make-block box128 (make-posn 430 310) 128))
+
+(define (change-block-up b) (change-block-v b "up"))
+(define (change-block-down b) (change-block-v b "down"))
+
+
+;;; move : [ListOf Block] [GridPos String -> GridPos] [Block String -> Block] -> [ListOf Block]
+;;; Moves the blocks in the grid
+(define (move lob change-gp change-block)
   (cond
     [(empty? lob) lob]
     [(cons? lob)
-     (if (pos-in-blocks? (change-gp-left (block-gridpos (first lob)))
-                         (map change-block-left (rest lob)))
-    
-         (cons (first lob) (move-left (rest lob)))
-    
+     (if (pos-in-blocks? (change-gp (block-gridpos (first lob)))
+                         (map change-block (rest lob)))
+         (cons (first lob) (move (rest lob) change-gp change-block))
          (cons
           (make-block (block-box (first lob))
-                      (change-gp-left (block-gridpos (first lob)))
+                      (change-gp (block-gridpos (first lob)))
                       (block-numval (first lob)))
-          (move-left (rest lob))))]))
+          (move (rest lob) change-gp change-block)))]))
 
 
-(check-expect (move-left '()) '())
+(check-expect (move '() change-gp-up change-block-up) '())
 
-(check-expect (move-left (list B1 B2))
+(check-expect (move (list B1 B2) change-gp-left change-block-left)
               (list (make-block box2 (make-posn 70 70) 2)
                     (make-block box64 (make-posn 70 310) 64)))
 
-(check-expect (move-left (list B1 B2 B4))
+(check-expect (move (list B1 B2 B4) change-gp-left change-block-left)
               (list (make-block box2 (make-posn 70 70) 2)
                     (make-block box64 (make-posn 190 310) 64)
                     (make-block box1024 (make-posn 70 310) 1024)))
