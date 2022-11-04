@@ -18,21 +18,20 @@
 
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
-(define-struct gridpos [posn])
-; A GridPos is a (make-gridpos Posn)
+; A GridPos is a Posn
 ; - posn is the position of a grid
 ; Interpretation: The grid position of a block
 
 ;;; EXAMPLES
 ;;;---------------
-(define GP1 (make-gridpos (make-posn 70 70)))
-(define GP2 (make-gridpos (make-posn 190 310)))
-(define GP3 (make-gridpos (make-posn 430 430)))
+(define GP1 (make-posn 70 70))
+(define GP2 (make-posn 190 310))
+(define GP3 (make-posn 430 430))
 
 ;;; TEMPLATE
 ;;;------------
 #;(define (gp-temp gp)
-    ...(posn-x (gridpos-posn gp))...(posn-y (gridpos-posn gp)))
+    ...(posn-x gp)...(posn-y gp))
 
 ;-----------------------------------------------------------------------------
 ; BlOCKS
@@ -138,14 +137,54 @@
   (make-gs (list B1 B2)
            (place-images
             (list (block-box B1) (block-box B2))
-            (list (gridpos-posn (block-gridpos B1))
-                  (gridpos-posn (block-gridpos B2)))
+            (list (block-gridpos B1)
+                  (block-gridpos B2))
             EMPTY-GRID)
            14))
 
 
+;-----------------------------------------------------------------------------
+; KEY HANDLERS
+;-----------------------------------------------------------------------------
+
+;;; move-left : Block -> Block
+;;; Moves a block to the left
+#;(define (move-left b)
+  (make-block (block-box b)
+    (make-gridpos (make-posn
+                   (- 120 (posn-x (gridpos-posn (block-gridpos b))))
+                  (posn-y (gridpos-posn (block-gridpos b)))))
+    (block-numval b)))
 
 
+;;; change-gp-left : GridPos -> GridPos
+;;; Shift the gridpos to the left
+
+#|
+(define GP1 (make-gridpos (make-posn 70 70)))
+(define GP2 (make-gridpos (make-posn 190 310)))
+(define GP3 (make-gridpos (make-posn 430 430)))
+
+
+(check-expect (change-gp-left GP1) (make-gridpos (make-posn )))
+|#
+
+
+;-----------------------------------------------------------------------------
+; BIG-BANG
+;-----------------------------------------------------------------------------
+
+; - onkey = move the blocks & update number of blocks left
+; - onrelease = generate a new block & update number of blocks left
+; - to-draw = placement of blocks
+; - stop-when = no grid space left
+
+#;(define my-game
+    (big-bang ____
+      [on-key move/update]
+      [on-release new/update]
+      [to-draw blocks->grid]
+      [stop-when no-space?]))
 
 
 
