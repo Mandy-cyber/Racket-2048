@@ -10,7 +10,7 @@
 ; - to-draw = placement of blocks
 ; - stop-when = no grid space left
 ; game state will be a structure with a listofblocks,
-;      positions of blocks, number of spaces left,
+;      grid, number of spaces left,
 
 ;-----------------------------------------------------------------------------
 ; GRIDPOS
@@ -18,22 +18,21 @@
 
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
-(define-struct gridpos [x y])
-; A GridPos is a (make-gridpos Number[1,4] Number[1,4])
-; - x is the x-position of a grid space
-; - y is the y-position of a grid space
-; Interpretation: The x and y position of a space on a grid
+(define-struct gridpos [posn])
+; A GridPos is a (make-gridpos Posn)
+; - posn is the position of a grid
+; Interpretation: The grid position of a block
 
-;;; EXAMPLES 
-;;;------------
-(define GP1 (make-gridpos 1 1))
-(define GP8 (make-gridpos 4 2))
-(define GP11 (make-gridpos 3 3))
+;;; EXAMPLES
+;;;---------------
+(define GP1 (make-gridpos (make-posn 70 70)))
+(define GP2 (make-gridpos (make-posn 190 310)))
+(define GP3 (make-gridpos (make-posn 430 430)))
 
 ;;; TEMPLATE
 ;;;------------
 #;(define (gp-temp gp)
-    ...(gridpos-x gp)...(gridpos-y gp))
+    ...(posn-x (gridpos-posn gp))...(posn-y (gridpos-posn gp)))
 
 ;-----------------------------------------------------------------------------
 ; BlOCKS
@@ -85,25 +84,53 @@
   (overlay/align "middle" "middle"
                  (text "2048" 24 "white") (square 100 "solid" "black")))
 
-;;; BLOCKS
-;;;-----------
-(define B2 (make-block box2 2))
-(define B4 (make-block box4 4))
-(define B8 (make-block box8 8))
-(define B16 (make-block box16 16))
-(define B32 (make-block box32 32))
-(define B64 (make-block box64 64))
-(define B128 (make-block box128 128))
-(define B256 (make-block box256 256))
-(define B512 (make-block box512 512))
-(define B1024 (make-block box1024 1024))
-(define B2048 (make-block box2048 2048))
+;;; EXAMPLES OF BLOCKS
+;;;-----------------------
+#|(define B2 (make-gridpos 2 2) (make-block box2 2))
+(define B4 (make-gridpos 1 3) (make-block box4 4))
+(define B128 (make-gridpos 4 4) (make-block box128 128))
+(define B256 (make-gridpos 3 2) (make-block box256 256))
+(define B2048 (make-gridpos 1 1) (make-block box2048 2048))|#
+
+
+;;; TEMPLATE
+;;;------------
+#;(define (block-temp block)
+    ...(block-box block)...
+    (gp-temp (block-gridpos block))...(block-numval block))
 
 
 ;-----------------------------------------------------------------------------
 ; GAMESTATE
 ;-----------------------------------------------------------------------------
 
+;;; DATA DEFINITION & INTERPRETATION
+;;;------------------------------------
+(define-struct gs [blocks grid spacesleft])
+; A GameState is a (make-gs [ListOf Block] Image Number[0,14])
+; - blocks is a list of all blocks in the grid
+; - grid is the image of the blocks in their different positions
+; - spacesleft is the number of spaces left in the grid
+; Interpretation: A game of 2048
+
+
+;;; GRID STUFF
+;;;---------------
+(define GAP (rectangle 20 100 "solid" "darkblue"))
+(define HGAP (rectangle 500 20 "solid" "darkblue"))
+(define BLANK-SQUARE (square 100 "solid" "lightblue"))
+(define ROW
+  (beside GAP BLANK-SQUARE GAP BLANK-SQUARE
+          GAP BLANK-SQUARE GAP BLANK-SQUARE GAP))
+
+(define EMPTY-GRID
+  (above HGAP ROW HGAP ROW HGAP ROW HGAP ROW HGAP))
+
+
+;;; EXAMPLES
+;;;-------------
+;(define GS0 (make-gs (list B2 B2) <grid-goes-here> 14))
+;(define GS1 (make-gs (list B2 B4 B8) <grid-goes-here> 11))
 
 
 
