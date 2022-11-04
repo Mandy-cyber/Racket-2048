@@ -9,7 +9,31 @@
 ; - onrelease = generate a new block & update number of blocks left
 ; - to-draw = placement of blocks
 ; - stop-when = no grid space left
-; game state will be a structure with a listofblocks, number of spaces left,
+; game state will be a structure with a listofblocks,
+;      positions of blocks, number of spaces left,
+
+;-----------------------------------------------------------------------------
+; GRIDPOS
+;-----------------------------------------------------------------------------
+
+;;; DATA DEFINITION & INTERPRETATION
+;;;------------------------------------
+(define-struct gridpos [x y])
+; A GridPos is a (make-gridpos Number[1,4] Number[1,4])
+; - x is the x-position of a grid space
+; - y is the y-position of a grid space
+; Interpretation: The x and y position of a space on a grid
+
+;;; EXAMPLES 
+;;;------------
+(define GP1 (make-gridpos 1 1))
+(define GP8 (make-gridpos 4 2))
+(define GP11 (make-gridpos 3 3))
+
+;;; TEMPLATE
+;;;------------
+#;(define (gp-temp gp)
+    ...(gridpos-x gp)...(gridpos-y gp))
 
 ;-----------------------------------------------------------------------------
 ; BlOCKS
@@ -17,9 +41,10 @@
 
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
-(define-struct block [box numval])
-; A Block is a (make-block Image Number)
+(define-struct block [box gridpos numval])
+; A Block is a (make-block Image GridPos Number)
 ; - box is the image of the block (specific color and number)
+; - gridpos is the grid position of the block
 ; - numval is the numeric value of the block
 ; Interpretation: A block in the 2048 game.
 
@@ -75,7 +100,9 @@
 (define B2048 (make-block box2048 2048))
 
 
-
+;-----------------------------------------------------------------------------
+; GAMESTATE
+;-----------------------------------------------------------------------------
 
 
 
