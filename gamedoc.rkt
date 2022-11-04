@@ -86,11 +86,9 @@
 
 ;;; EXAMPLES OF BLOCKS
 ;;;-----------------------
-#|(define B2 (make-gridpos 2 2) (make-block box2 2))
-(define B4 (make-gridpos 1 3) (make-block box4 4))
-(define B128 (make-gridpos 4 4) (make-block box128 128))
-(define B256 (make-gridpos 3 2) (make-block box256 256))
-(define B2048 (make-gridpos 1 1) (make-block box2048 2048))|#
+(define B1 (make-block box2 GP1 2))
+(define B2 (make-block box64 GP2 64))
+(define B3 (make-block box128 GP3 128))
 
 
 ;;; TEMPLATE
@@ -107,7 +105,7 @@
 ;;; DATA DEFINITION & INTERPRETATION
 ;;;------------------------------------
 (define-struct gs [blocks grid spacesleft])
-; A GameState is a (make-gs [ListOf Block] [16 Images -> Image] Number[0,14])
+; A GameState is a (make-gs [ListOf Block] [Image Image -> Image] Number[0,14])
 ; - blocks is a list of all blocks in the grid
 ; - grid is the image of the blocks in their different positions
 ; - spacesleft is the number of spaces left in the grid
@@ -121,8 +119,10 @@
 (define BS (square 100 "solid" "lightblue"))
 
 ; will make more efficient later
+; grid: 16 Blocks -> Image
 (define (grid a b c d e f g h i j k l m n o p)
-  (above HGAP (beside GAP a GAP b GAP c GAP d GAP)
+  (above
+   HGAP (beside GAP a GAP b GAP c GAP d GAP)
    HGAP (beside GAP e GAP f GAP g GAP h GAP)
    HGAP (beside GAP i GAP j GAP k GAP l GAP)
    HGAP (beside GAP m GAP n GAP o GAP p GAP)
@@ -134,10 +134,16 @@
 
 ;;; EXAMPLES
 ;;;-------------
-#|(define GS0
-  (make-gs (list B2 B2) () 14))
+(define GS0
+  (make-gs (list B1 B2)
+           (place-images
+            (list (block-box B1) (block-box B2))
+            (list (gridpos-posn (block-gridpos B1))
+                  (gridpos-posn (block-gridpos B2)))
+            EMPTY-GRID)
+           14))
 
-(define GS1 (make-gs (list B2 B4 B8) <grid-goes-here> 11))|#
+
 
 
 
